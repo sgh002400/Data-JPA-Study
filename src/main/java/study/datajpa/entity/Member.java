@@ -20,7 +20,10 @@ import javax.persistence.*;
  *
  * 결과 -> User(id=1, username=1234, scores=[80, 70, 100])
  */
-
+@NamedQuery(
+        name="Member.findByUsername",
+        query="select m from Member m where m.username = :username"
+)
 public class Member {
     @Id
     @GeneratedValue
