@@ -3,6 +3,7 @@ package study.datajpa.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 
 import java.util.List;
@@ -28,4 +29,17 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
      * JQPL을 사용하면 이는 그냥 문자로 인식하기 때문에 컴파일 시점에 오류를 잡아주지 않는다. 해당 쿼리를 날리게 될 때 에러가 발생하는 최악의 상황이지만
      * NamedQuery를 사용하면 application 로딩 시점에 파싱을 해서 오류가 있다면 에러를 알려준다!!
      */
+
+    /**
+     * @Query는 이름이 없는 NamedQuery라고 생각하면 된다.
+     * @Query 역시 application 로딩 시점에 파싱을 해서 sql을 만들어 놓는다. 그렇기 때문에 오류를 바로 잡아준다!
+     */
+    @Query("select m from Member m where m.username= :username and m.age = :age")
+    List<Member> findUser(@Param("username") String username, @Param("age") int age);
+
+    @Query("select m.username from Member m") //username만 뽑는 방법
+    List<String> findUsernameList();
+
+    @Query("select new study.datajpa.dto.MemberDto(m.id, m.username, t.name) from Member m join m.team t")
+    List<MemberDto> findMemberDto();
 }
