@@ -1,40 +1,15 @@
 package study.datajpa.repository;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import study.datajpa.entity.Team;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.util.List;
-import java.util.Optional;
 
-@Repository
-public class TeamJpaRepository {
-
-    @PersistenceContext
-    private EntityManager em;
-
-    public Team save(Team team) {
-        em.persist(team);
-        return team;
-    }
-
-    public void delete(Team team) {
-        em.remove(team);
-    }
-
-    public List<Team> findAll() {
-        return em.createQuery("select t from Team t", Team.class)
-                .getResultList();
-    }
-
-    public Optional<Team> findById(Long id) {
-        Team team = em.find(Team.class, id);
-        return Optional.ofNullable(team);
-    }
-
-    public long count() {
-        return em.createQuery("select count(t) from Team t", Long.class)
-                .getSingleResult();
-    }
+/**
+ * @Repository 어노테이션 생략 가능!
+ *
+ * @Repository 어노테이션 기능은 사실 두 가지임.
+ * 컴포넌트 스캔을 스프링 데이터 JPA가 자동으로 처리
+ * JPA 예외를 스프링 예외로 변환하는 과정도 자동으로 처리
+ */
+public interface TeamRepository extends JpaRepository<Team, Long> { //첫 번째 인자는 타입, 두 번째 인자는 PK
 }

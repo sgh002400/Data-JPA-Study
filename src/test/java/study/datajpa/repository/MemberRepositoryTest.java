@@ -13,6 +13,12 @@ import study.datajpa.entity.Member;
 @Rollback(false)
 public class MemberRepositoryTest {
 
+    /** MemberRepository 인터페이스가 동작한 이유
+     *
+     * memberRepository.getClass()를 출력해보면 class com.sun.proxy.$ProxyXXX 가 나온다.
+     * -> 스프링이 인터페이스를 보고 프록시 객체를 만들어준거(구현체).
+     */
+
     @Autowired MemberRepository memberRepository;
 
     @Test
