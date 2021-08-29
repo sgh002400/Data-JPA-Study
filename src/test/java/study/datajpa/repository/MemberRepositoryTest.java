@@ -295,7 +295,53 @@ public class MemberRepositoryTest {
             System.out.println("fetch.getUsername() = " + fetch.getUsername());
             System.out.println("fetch.team = " + fetch.getTeam().getName());
         }
+    }
+
+    @Test
+    public void queryHint() throws Exception {
 
 
+        //given
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+
+        em.flush(); //영속성 컨텍스트에 있는 결과를 DB에 동기화 하는 것이지 영속성 컨텍스트를 초기화까지는 하지 않기 때문에
+        em.clear(); //여기서 초기화 해준거
+
+        //when
+        Member findMember = memberRepository.findById(member1.getId()).get();
+        findMember.setUsername("member2");
+
+        em.flush(); //변경 감지에 의해 update Query가 날아감
+
+        /**
+         * 변경 감지를 사용하기 위해서는 내부적으로 원본, 복사본이 있어야 변경이 되었는지 확인이 가능하기 때문에 메모리를 더 잡아 먹는다!
+         *
+         * Member findMember = memberRepository.findReadOnlyByUsername("member1");
+         * 이 순간에 원본, 복사본을 만든다. (.setUsername()을 하지 않아도 만들어놓는다.)
+         *
+         * 근데 만약 나는 조회용으로만 쓰고 싶다면?? (복사용을 안만들고 싶다면?) -> Hint 사용
+         * Hibernate가 제공한다. JPA 표준은 제공 X
+         */
+
+         Member findReadOnlyByUsername = memberRepository.findReadOnlyByUsername("member1");
+         findReadOnlyByUsername.setUsername("member2"); //변경 감지 체크 자체를 안하기 때문에 update 쿼리도 당연히 안날라감
+
+         em.flush();
+    }
+
+    @Test
+    public void lock() {
+
+
+        //given
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+
+        em.flush();
+        em.clear();
+
+        //when
+        List<Member> result = memberRepository.findListByUsername("member1");
     }
 }
