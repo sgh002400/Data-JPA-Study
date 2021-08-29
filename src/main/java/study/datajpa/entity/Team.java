@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(of = {"id", "name"})
-public class Team {
+public class Team { //여기도 마찬가지로 extends JpaBaseEntity를 해서 테이블 등록일, 수정일 추가를 한번에 할 수 있다.
     @Id @GeneratedValue
     @Column(name = "team_id")
     private Long id;
