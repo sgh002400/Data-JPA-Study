@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -115,4 +116,27 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     //영속성 컨텍스트가 초기화되지 않아서 생기는 문제는 em.clear()로 해결할 수도 있고 여기서 @Modifying(clearAutomatically = true)로 해결할 수도 있다.
     @Query("update Member m set m.age = m.age + 1 where m.age >= :age")
     int bulkAgePlus(@Param("age") int age); //반환 타입이 int여야 한다.
+
+    @Query("select m from Member m left join fetch m.team")
+    List<Member> findMemberFetchJoin();
+
+
+    /**
+     * JPQL로 fetch 조인을 쓰지 않고 @EntityGraph로 동일한 기능을 수행하는 방법!
+     *
+     * LEFT OUTER JOIN 사용한다.
+     */
+    //findAll() 공통 메서드 오버라이드
+    @Override
+    @EntityGraph(attributePaths = {"team"})
+    List<Member> findAll();
+
+    //JPQL + 엔티티 그래프 -> 쿼리를 원하는대로 짜면서 fetch 기능으로 연관된걸 한번에 뽑고 싶을 때 사용
+    @EntityGraph(attributePaths = {"team"})
+    @Query("select m from Member m")
+    List<Member> findMemberEntityGraph();
+
+    //메서드 이름으로 쿼리에서 특히 편리하다.
+    @EntityGraph(attributePaths = {"team"})
+    List<Member> findEntityGraphByUsername(@Param("username") String username);
 }

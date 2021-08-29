@@ -259,4 +259,43 @@ public class MemberRepositoryTest {
          */
 
     }
+
+    @Test
+    public void findMemberLazyFetch() throws Exception {
+        //given
+        //member1 -> teamA
+        //member2 -> teamB
+
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+
+        memberRepository.save(new Member("member1", 10, teamA));
+        memberRepository.save(new Member("member2", 20, teamB));
+
+        em.flush();
+        em.clear();
+
+        //when
+        List<Member> membersLazy = memberRepository.findAll();
+
+        //then
+        // N+1 문제 발생
+        for (Member lazy : membersLazy) {
+            System.out.println("lazy.getUsername() = " + lazy.getUsername());
+            System.out.println("member.team = " + lazy.getTeam().getName());
+        }
+
+        //N+1 문제 발생 X
+        List<Member> memberFetch = memberRepository.findMemberFetchJoin();
+        //List<Member> membersLazy = memberRepository.findEntityGraphByUsername("member1"); 하면 위와 동일하게 fetch join 적용됨
+
+        for (Member fetch : memberFetch) {
+            System.out.println("fetch.getUsername() = " + fetch.getUsername());
+            System.out.println("fetch.team = " + fetch.getTeam().getName());
+        }
+
+
+    }
 }
