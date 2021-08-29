@@ -344,4 +344,9 @@ public class MemberRepositoryTest {
         //when
         List<Member> result = memberRepository.findListByUsername("member1");
     }
+
+    @Test
+    public void callCustom() {
+        List<Member> result = memberRepository.findMemberCustom();
+    }
 }
