@@ -73,11 +73,14 @@ public class MemberTest {
 
         //then
         System.out.println("findMember.createdDate = " + findMember.getCreatedDate());
-        System.out.println("findMember.updatedDate = " + findMember.getUpdatedDate());
+        System.out.println("findMember.updatedDate = " + findMember.getLastModifiedDate()); //Member가 BaseEntity를 상속해서 바뀜
 
         /** 결과
          * findMember.createdDate = 2021-08-30T02:51:34.772697
          * findMember.updatedDate = 2021-08-30T02:51:34.935096
          */
+
+        System.out.println("findMember.createdBy = " + findMember.getCreatedBy());
+        System.out.println("findMember.updatedBy = " + findMember.getLastModifiedBy());
     }
 }
