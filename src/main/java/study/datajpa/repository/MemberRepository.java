@@ -1,5 +1,9 @@
 package study.datajpa.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -56,10 +60,49 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findOptionalByUsername(String name); //단건 Optional
 
     /**
-     *  참고: 단건으로 지정한 메서드를 호출하면 스프링 데이터 JPA는 내부에서 JPQL의
+     * 참고: 단건으로 지정한 메서드를 호출하면 스프링 데이터 JPA는 내부에서 JPQL의
      * Query.getSingleResult() 메서드를 호출한다. 이 메서드를 호출했을 때 조회 결과가 없으면
      * javax.persistence.NoResultException 예외가 발생하는데 개발자 입장에서 다루기가 상당히
      * 불편하다. 스프링 데이터 JPA는 단건을 조회할 때 이 예외가 발생하면 예외를 무시하고 대신에 null 을
      * 반환한다.
+     */
+
+
+    /** 페이징
+     *
+     * 페이징과 정렬 파라미터
+     * org.springframework.data.domain.Sort : 정렬 기능
+     * org.springframework.data.domain.Pageable : 페이징 기능 (내부에 Sort 포함)
+
+     * 특별한 반환 타입
+     * org.springframework.data.domain.Page : 추가 count 쿼리 결과를 포함하는 페이징
+
+     * org.springframework.data.domain.Slice : 추가 count 쿼리 없이 다음 페이지만 확인 가능
+     * 내부적으로 인자로 넣어준 limit + 1조회 -> 다음 페이지가 있는지 없는지 확인할 때 사용된다.
+     * 예를 들어 [더보기] 같이 페이지가 필요 없고 element가 더 있는지 없는지만 확인할 때 사용됨됨
+     *
+     * List (자바 컬렉션): 추가 count 쿼리 없이 결과만 반환
+
+     * Slice<Member> findByUsername(String name, Pageable pageable); //count 쿼리 사용 안함
+     * List<Member> findByUsername(String name, Pageable pageable); //count 쿼리 사용 안함
+     * List<Member> findByUsername(String name, Sort sort);
+     */
+    Page<Member> findPageByAge(int age, Pageable pageable); //반환 타입을 Page로 하고 파라미터로 Pageable interface를 넣어주면 끝! //count 쿼리 사용함
+
+    Slice<Member> findSliceByAge(int age, Pageable pageable); //count 쿼리 사용안함
+
+    //이렇게도 사용할 수 있다
+//    List<Member> findByAge(int age, Pageable pageable); //count 쿼리 사용안함
+//    List<Member> findByAge(int age, Sort sort);
+
+    /** Count 쿼리 분리하기!
+     *
+     * 위에서 만든 메서드를 예로 들자면
+     *
+     * @Query(value = "select m from Member m left join m.team t", countQuery = "select count(m) from Member m")
+     * Page<Member> findPageByAge(int age, Pageable pageable);
+     *
+     * 복잡하게 join을 여러번 하는 경우에는 count 쿼리도 join을 여러번해서 날아가게 되는데 이러면 성능상 매우 좋지 않다.
+     * 그래서 그런게 필요 없는 경우에는 countQuery만 분리해서 간단하게 원하는 쿼리를 작성해줄 수 있다.
      */
 }
