@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import study.datajpa.dto.MemberDto;
@@ -105,4 +106,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
      * 복잡하게 join을 여러번 하는 경우에는 count 쿼리도 join을 여러번해서 날아가게 되는데 이러면 성능상 매우 좋지 않다.
      * 그래서 그런게 필요 없는 경우에는 countQuery만 분리해서 간단하게 원하는 쿼리를 작성해줄 수 있다.
      */
+
+    /**
+     * @Modifying 어노테이션을 사용하지 않으면 다음 예외 발생
+     * org.hibernate.hql.internal.QueryExecutionRequestException: Not supported for DML operations
+     */
+    @Modifying//벌크성 수정, 삭제 쿼리는 @Modifying 어노테이션을 사용해야 한다.
+    //영속성 컨텍스트가 초기화되지 않아서 생기는 문제는 em.clear()로 해결할 수도 있고 여기서 @Modifying(clearAutomatically = true)로 해결할 수도 있다.
+    @Query("update Member m set m.age = m.age + 1 where m.age >= :age")
+    int bulkAgePlus(@Param("age") int age); //반환 타입이 int여야 한다.
 }

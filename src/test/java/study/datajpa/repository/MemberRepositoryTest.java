@@ -14,6 +14,8 @@ import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -31,8 +33,15 @@ public class MemberRepositoryTest {
      * -> 스프링이 인터페이스를 보고 프록시 객체를 만들어준거(구현체).
      */
 
+    @PersistenceContext
+    EntityManager em; //이게 영속성 컨텍스트이다.
+
     @Autowired MemberRepository memberRepository;
     @Autowired TeamRepository teamRepository;
+
+    /**
+     * 같은 트랜잭션이면 같은 영속성 컨텍스트를 사용한다. 따라서 em, memberRepository, teamRepository 모두 같은 영속성 컨텍스트를 사용한다.
+     */
 
     @Test
     public void testMember() {
@@ -210,5 +219,44 @@ public class MemberRepositoryTest {
         //assertThat(slice.getTotalPages()).isEqualTo(2);
         assertThat(slice.isFirst()).isTrue();
         assertThat(slice.hasNext()).isTrue();
+    }
+
+    @Test
+    public void bulkUpdate() throws Exception {
+
+        //given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 19));
+        memberRepository.save(new Member("member3", 20));
+        memberRepository.save(new Member("member4", 21));
+        memberRepository.save(new Member("member5", 40));
+
+        //JPQL을 사용하면 JPQL이 실행되기 전에 자동으로 영속성 컨텍스트가 flush되기 때문에 자동으로 먼저 위의 save 쿼리가 날라가게 된다.
+
+        //when
+        int resultCount = memberRepository.bulkAgePlus(20);
+        em.flush(); //flush()를 하면 변경되지 않은 부분이 DB에 반영된다.
+        //여기서 flush() 했을 때 db에 40이 반영되지 않고 41로 남아 있는 이유
+        //-> 엔티티에 직접적인 변경 내용이 있어야 flush() 시점에 변경 감지의 대상이 돼서 변경된 내용을 반영하는데 벌크 연산은 엔티티에 영향을 주지 않아서 그렇다!
+
+        em.clear(); //영속성 컨텍스트 초기화화
+
+       //벌크 연산을 했기 때문에 DB에는 member5가 41로 update 됐지만 영속성 컨텍스트에서는 40살로 남아있다.
+        List<Member> result = memberRepository.findByUsername("member5");
+        Member member5 = result.get(0);
+
+        System.out.println("member5 = " + member5); //결과 : membr5 = Member(id=5, username=member5, age=40)
+
+        //then
+        assertThat(resultCount).isEqualTo(3);
+
+        /** 벌크 연산의 문제점!
+         *JPA에서는 영속성 컨테이너에서 엔티티들이 관리가 되는데 그걸 가지고 1차 캐쉬에서 변경이 일어나면 자동으로 update 쿼리를 날려주고 하는건데
+         *벌크 연산은 영속성 컨텍스트를 무시하고 DB에 바로 쿼리를 날리니까 영속성 컨텍스트는 변경이 된지 모른다!!
+         *
+         * 해결 방법 -> 벌크 연산 이후에는 영속성 컨텍스트를 초기화하면 됨. -> em.flush(), em.clear()
+         * 영속성 컨텍스트를 날려버리고 나면 .findByUsername()을 할 때 완전 깔끔한 상태에서 DB에서 다시 조회해온다.
+         */
+
     }
 }

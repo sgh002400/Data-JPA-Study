@@ -75,4 +75,12 @@ public class MemberJpaRepository {
                 .setParameter("age", age)
                 .getSingleResult();
     }
+
+    public int bulkAgePlus(int age) { //모든 직원의 연봉 10퍼센트 인상과 같이 한번에 모든 객체를 대상으로 하는 쿼리를 벌크성 수정 쿼리라고 한다.
+        int resultCount = em.createQuery(
+                        "update Member m set m.age = m.age + 1 where m.age >= :age")
+                .setParameter("age", age)
+                .executeUpdate();
+        return resultCount;
+    }
 }
