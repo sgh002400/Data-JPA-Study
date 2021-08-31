@@ -93,7 +93,7 @@ public class MemberController {
      * 사용하는 한계가 있다.
      */
 
-    @PostConstruct
+    //@PostConstruct
     public void init() {
         for (int i = 0; i < 100; i++) {
             memberRepository.save(new Member("user" + i, i));
