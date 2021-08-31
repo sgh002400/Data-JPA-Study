@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
+import study.datajpa.dto.UsernameOnlyDto;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
@@ -366,9 +367,9 @@ public class MemberRepositoryTest {
         em.clear();
 
         //when
-        List<UsernameOnly> result = memberRepository.findProjectionsByUsername("m1");
+        List<UsernameOnlyDto> result = memberRepository.findProjectionsByUsername("m1");
 
-        for (UsernameOnly usernameOnly : result) {
+        for (UsernameOnlyDto usernameOnly : result) {
             System.out.println("usernameOnly = " + usernameOnly.getUsername());
         }
 
