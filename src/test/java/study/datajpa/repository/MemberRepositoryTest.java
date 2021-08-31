@@ -367,10 +367,15 @@ public class MemberRepositoryTest {
         em.clear();
 
         //when
-        List<UsernameOnlyDto> result = memberRepository.findProjectionsByUsername("m1", UsernameOnlyDto.class);
+        List<NestedClosedProjections> result = memberRepository.findProjectionsByUsername("m1", NestedClosedProjections.class); //쿼리 조건만 findbyusername이고 실제 projection에 대한 조건은 nestedclosedprojection을 따른다.
 
-        for (UsernameOnlyDto usernameOnly : result) {
-            System.out.println("usernameOnly = " + usernameOnly.getUsername());
+        for (NestedClosedProjections nestedClosedProjections : result) {
+
+            String username = nestedClosedProjections.getUsername();
+            System.out.println("username = " + username);
+
+            String teamName = nestedClosedProjections.getTeam().getName();
+            System.out.println("teamName = " + teamName);
         }
 
         //then
