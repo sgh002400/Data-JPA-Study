@@ -159,4 +159,28 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
      * 반환 타입에 프로젝션하고 싶은 데이터를 넣은 인터페이스를 넣으면 끝
      */
     <T>List<T> findProjectionsByUsername(@Param("username") String username, Class<T> type); //어쩔 땐 username만 가져오고 싶고 어쩔 땐 나이만 가져오고 싶고 이런식으로 바꾸고 싶을 때 타입만 추가해서 넘기면 된다!
+
+
+    /** 스프링 데이터 JPA 기반 네이티브 쿼리
+     *
+     * 페이징 지원함
+     *
+     * 반환 타입
+     * Object[]
+     * Tuple
+     * DTO(스프링 데이터 인터페이스 Projections 지원)
+     *
+     * 제약
+     * Sort 파라미터를 통한 정렬이 정상 동작하지 않을 수 있음(믿지 말고 직접 처리)
+     * JPQL처럼 애플리케이션 로딩 시점에 문법 확인 불가
+     * 동적 쿼리 불가
+     */
+    @Query(value = "select  * from member where username = ?", nativeQuery = true)
+    Member findByNativeQuery(String username);
+
+    /** NativeQuery를 사용해서 DTO로 받는 방법 */
+    @Query(value = "SELECT m.member_id as id, m.username, t.name as teamName FROM member m left join team t",
+            countQuery = "SELECT count(*) from member",
+            nativeQuery = true)
+    Page<MemberProjection> findByNativeProjection(Pageable pageable);
 }
