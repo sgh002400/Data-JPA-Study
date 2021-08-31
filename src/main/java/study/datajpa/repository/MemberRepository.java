@@ -158,5 +158,5 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
      *
      * 반환 타입에 프로젝션하고 싶은 데이터를 넣은 인터페이스를 넣으면 끝
      */
-    List<UsernameOnlyDto> findProjectionsByUsername(@Param("username") String username);
+    <T>List<T> findProjectionsByUsername(@Param("username") String username, Class<T> type); //어쩔 땐 username만 가져오고 싶고 어쩔 땐 나이만 가져오고 싶고 이런식으로 바꾸고 싶을 때 타입만 추가해서 넘기면 된다!
 }
